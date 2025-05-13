@@ -3,10 +3,10 @@ import os
 import torch
 
 def get_embedding_model():
-    """Optimized embedding model loader with caching"""
+    """Loader model embedding yang dioptimalkan dengan caching"""
     model_name = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
     
-    # Auto-configure device with fallback
+    # Konfigurasi otomatis device dengan fallback
     device = "cuda" if torch.cuda.is_available() else "cpu"
     
     return SentenceTransformerEmbeddings(
