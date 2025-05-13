@@ -185,14 +185,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-    ## tambah use case untuk tanya jawab resume
-    ## modifikasi up resume per use case, buat saat tiap pindah use case, resume yg sudah di up di use case tersebut tidak lsg hilang kecuali user uncheck/hapus sehingga waktu balik use case tersebut masih ada file yg di uploud sebelumnya di use case tersebut
-    ## modfikasi di use case compare_candidates bisa up satu folder yg berisi banyak resume(saat ini baru multiple pdf), dan di dalam folder tersebut berisis resume atau bisa ada subfolder, dan semua resume di dalam folder dan/atau subfolder tersebut bisa di upload sekaligus
-    ## Modif pada use case compare_candidates, jika ada resume yang tidak bisa di parse, maka resume tersebut di skip dan tidak di tampilkan di hasil analisis, dan di tampilkan pesan resume tersebut tidak bisa di parse
-    ## modif use case compare_candidates, dalam compare candidate melihat job desc yg di uploud di use case candidate search, dan di bandingkan dengan resume yg di upload di use case compare candidates, dan di tampilkan hasil analisisnya, dan di tampilkan juga resume yg tidak bisa di parse
-    ## tambah use case menjukan score dan ranking kandidat berdasar resume dan analisis, jadi buat ada penilaiiannya gitu, untuk penilaiannya bisa berdasar seting klasifikasi teks, misal ada 5 klasifikasi, dan setiap resume di klasifikasikan ke dalam 5 klasifikasi tersebut, dan setiap klasifikasi ada bobotnya, misal bobot 1-10, dan setiap resume di beri score dari 1-10 untuk setiap klasifikasi tersebut, dan di akhir di ranking berdasarkan score total dari semua klasifikasi tersebut atau bisa di buat berdasasr similarity kriteria yang diinginkan, misal ada 5 kriteria, dan setiap resume di klasifikasikan ke dalam 5 kriteria tersebut, dan setiap kriteria ada bobotnya, misal bobot 1-10, dan setiap resume di beri score dari 1-10 untuk setiap kriteria tersebut, dan di akhir di ranking berdasarkan score total dari semua kriteria tersebut
-    # tambah use case untuk klasifikasi dan klustering resume (belum kepikiran label klasifikasi dan fitur yg membedakan dan mendukung klasifikasi dan jlastering)
-    ## tambah untuk visualisasi hasil analisis resume
-    ## tambah untuk eksport hasil analisis use case compare, rangking, klasifikasi, dan clustering dan compare resume ke format lain (misal CSV, JSON)
-    # referensi (https://github.com/tatashandharu15/CV-Analytics-LLM--using-OpenAI)
