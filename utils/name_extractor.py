@@ -4,18 +4,20 @@ from typing import Optional
 
 class NameExtractor:
     def __init__(self):
+        # Prefix yang mungkin digunakan sebelum nama dalam resume
         self.name_prefixes = ["nama:", "name:", "full name:", "nama lengkap:"]
+        # Kata-kata yang tidak termasuk nama
         self.exclude_words = ["resume", "cv", "curriculum", "vitae"]
     
     def extract_name_from_resume(self, resume_text: str, filename: str = "") -> str:
-        """Enhanced name extraction with filename fallback"""
+        """Ekstraksi nama dari teks resume dengan fallback ke nama file"""
         try:
-            # First try to extract from resume text
+            # Pertama coba ekstrak dari teks resume
             text_name = self._extract_from_text(resume_text)
             if text_name:
                 return text_name
                 
-            # Fall back to filename if text extraction fails
+            # Jika gagal, gunakan nama file
             if filename:
                 file_name = self._extract_from_filename(filename)
                 if file_name:
@@ -27,10 +29,10 @@ class NameExtractor:
         return self._generate_fallback_name(filename)
     
     def _extract_from_text(self, text: str) -> Optional[str]:
-        """Extract name from resume text content"""
+        """Ekstrak nama dari konten teks resume"""
         lines = [line.strip() for line in text.split('\n') if line.strip()]
         
-        # Pattern 1: Look for name candidates in first 10 lines
+        # Pola 1: Cari kandidat nama di 10 baris pertama
         potential_names = [
             line for line in lines[:10] 
             if 2 <= len(line.split()) <= 4
@@ -38,7 +40,7 @@ class NameExtractor:
             and not any(word in line.lower() for word in self.exclude_words)
         ]
         
-        # Pattern 2: Check for explicit name labels
+        # Pola 2: Cek label nama yang eksplisit
         for line in lines[:15]:
             line_lower = line.lower()
             for prefix in self.name_prefixes:
@@ -50,7 +52,7 @@ class NameExtractor:
         return potential_names[0].title() if potential_names else None
     
     def _extract_from_filename(self, filename: str) -> Optional[str]:
-        """Extract name from filename"""
+        """Ekstrak nama dari nama file"""
         if not filename:
             return None
             
@@ -63,7 +65,7 @@ class NameExtractor:
             return None
     
     def _generate_fallback_name(self, filename: str = "") -> str:
-        """Generate a fallback name from filename or generic"""
+        """Buat nama fallback dari nama file atau generic"""
         if filename:
             try:
                 base = os.path.splitext(os.path.basename(filename))[0]
@@ -75,10 +77,10 @@ class NameExtractor:
                 pass
         return "Candidate " + (str(abs(hash(filename))[:4]) if filename else "")
 
-# Create a module-level instance
+# Buat instance di level modul
 name_extractor = NameExtractor()
 
-# Provide backward-compatible function
+# Fungsi untuk backward compatibility
 def extract_name_from_resume(resume_text: str, filename: str = "") -> str:
-    """Standalone function for backward compatibility"""
+    """Fungsi standalone untuk kompatibilitas ke belakang"""
     return name_extractor.extract_name_from_resume(resume_text, filename)
