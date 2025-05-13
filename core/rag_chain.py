@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 load_dotenv()
 
-# Initialize components
+# Inisialisasi komponen
 llm = ChatGroq(
     temperature=0,
     model_name="deepseek-r1-distill-llama-70b",
@@ -23,32 +23,32 @@ name_extractor = NameExtractor()
 standardizer = ResumeStandardizer()
 
 def _batch_process(func, items: List, batch_size: int = 5):
-    """Helper for parallel processing"""
+    """Helper untuk pemrosesan paralel"""
     with ThreadPoolExecutor(max_workers=batch_size) as executor:
         return list(executor.map(func, items))
 
 def _get_candidate_name(resume_text: str, filename: str = "") -> str:
-    """Wrapper for name extraction"""
+    """Wrapper untuk ekstraksi nama"""
     return name_extractor.extract_name_from_resume(resume_text, filename)
 
 def resume_qa(resume_text: str, question: str, filename: str = "") -> str:
-    """Enhanced resume Q&A with standardization"""
+    """Q&A resume yang ditingkatkan dengan standardisasi"""
     try:
         std_resume = standardizer.standardize_resume(resume_text)
         candidate_name = _get_candidate_name(resume_text, filename)
         
         prompt = ChatPromptTemplate.from_template(
-            """Answer this question about {name}'s resume:
-            Question: {question}
+            """Jawab pertanyaan tentang resume {name}:
+            Pertanyaan: {question}
             
-            Resume Content:
+            Konten Resume:
             {resume_text}
             
-            Rules:
-            1. Refer to candidate as {name}
-            2. Be specific about section references
-            3. If unsure, say "Not specified in resume"
-            4. Answer in Indonesian languange"""
+            Aturan:
+            1. Sebut kandidat sebagai {name}
+            2. Spesifik tentang referensi bagian
+            3. Jika tidak yakin, katakan "Tidak disebutkan di resume"
+            4. Jawab dalam bahasa Indonesia"""
         )
         
         chain = prompt | llm
@@ -58,14 +58,14 @@ def resume_qa(resume_text: str, question: str, filename: str = "") -> str:
             "name": candidate_name
         }).content
     except Exception:
-        return "Unable to analyze resume"
+        return "Tidak dapat menganalisis resume"
 
 def candidate_search(jd_text: str, resume_docs: Optional[List[Tuple[str, str]]] = None) -> str:
-    """Optimized candidate search with name extraction"""
+    """Pencarian kandidat yang dioptimalkan dengan ekstraksi nama"""
     retriever = get_retriever()
     
     if resume_docs is None:
-        # If no resumes provided, use the retriever to find relevant ones
+        # Jika tidak ada resume yang diberikan, gunakan retriever untuk mencari yang relevan
         relevant_docs = retriever.invoke(jd_text)
         processed = _batch_process(
             lambda doc: (
@@ -75,7 +75,7 @@ def candidate_search(jd_text: str, resume_docs: Optional[List[Tuple[str, str]]] 
             relevant_docs
         )
     else:
-        # Use the provided resumes
+        # Gunakan resume yang diberikan
         processed = _batch_process(
             lambda data: (
                 standardizer.standardize_resume(data[0]),
@@ -85,20 +85,20 @@ def candidate_search(jd_text: str, resume_docs: Optional[List[Tuple[str, str]]] 
         )
     
     prompt = ChatPromptTemplate.from_template(
-        """Job Description:
+        """Deskripsi Pekerjaan:
         {jd_text}
         
-        Matching Candidates:
+        Kandidat yang Cocok:
         {candidates}
         
-        Provide in Indonesian language:
-        1. Top 3 matches with rationale
-        2. Missing skills
-        3. Hiring recommendations"""
+        Berikan dalam bahasa Indonesia:
+        1. 3 kecocokan teratas dengan alasan
+        2. Keterampilan yang kurang
+        3. Rekomendasi perekrutan"""
     )
     
     candidates_formatted = "\n\n".join(
-        f"Candidate {i+1} ({name}):\n{text[:2000]}..."
+        f"Kandidat {i+1} ({name}):\n{text[:2000]}..."
         for i, (text, name) in enumerate(processed)
     )
     
@@ -109,20 +109,20 @@ def candidate_search(jd_text: str, resume_docs: Optional[List[Tuple[str, str]]] 
     }).content
 
 def candidate_profiling(resume_text: str, filename: str = "") -> str:
-    """Standardized profiling with name"""
+    """Profil standar dengan nama"""
     std_resume = standardizer.standardize_resume(resume_text)
     level = standardizer.detect_resume_level(std_resume)
     candidate_name = _get_candidate_name(resume_text, filename)
     
     prompt = ChatPromptTemplate.from_template(
-        """Analyze this resume for {name} ({level} level):
+        """Analisis resume ini untuk {name} (level {level}):
         {resume_text}
         
-        Provide in Indonesian language:
-        1. 5 key strengths
-        2. 3 development areas  
-        3. Recommended roles
-        4. Interview questions"""
+        Berikan dalam bahasa Indonesia:
+        1. 5 kekuatan utama
+        2. 3 area pengembangan  
+        3. Peran yang direkomendasikan
+        4. Pertanyaan wawancara"""
     )
     
     chain = prompt | llm
@@ -133,11 +133,11 @@ def candidate_profiling(resume_text: str, filename: str = "") -> str:
     }).content
 
 def compare_candidates(resume_data: List[Tuple[str, str]], jd_text: Optional[str] = None) -> str:
-    """Compare multiple candidates with names"""
+    """Bandingkan beberapa kandidat dengan nama"""
     if not resume_data:
-        return "No valid resumes to compare"
+        return "Tidak ada resume yang valid untuk dibandingkan"
     
-    # Process all resumes in parallel
+    # Proses semua resume secara paralel
     processed = _batch_process(
         lambda data: (
             standardizer.standardize_resume(data[0]),
@@ -146,16 +146,16 @@ def compare_candidates(resume_data: List[Tuple[str, str]], jd_text: Optional[str
         resume_data
     )
     
-    prompt_template = """Compare these {count} candidates{jd_context}:
+    prompt_template = """Bandingkan {count} kandidat{jd_context}:
     {candidates}
     
-    Analysis in Indonesian languange and should include:
-    1. Technical competence comparison
-    2. Leadership potential  
-    3. Cultural add
-    4. Growth potential"""
+    Analisis dalam bahasa Indonesia harus mencakup:
+    1. Perbandingan kompetensi teknis
+    2. Potensi kepemimpinan  
+    3. Nilai tambah budaya
+    4. Potensi pengembangan"""
     
-    # Format with candidate names
+    # Format dengan nama kandidat
     candidates_formatted = "\n\n---\n\n".join(
         f"{name}:\n{text[:2000]}..." 
         for text, name in processed
@@ -163,7 +163,7 @@ def compare_candidates(resume_data: List[Tuple[str, str]], jd_text: Optional[str
     
     prompt = ChatPromptTemplate.from_template(prompt_template.format(
         count=len(processed),
-        jd_context=" against job description" if jd_text else "",
+        jd_context=" terhadap deskripsi pekerjaan" if jd_text else "",
         candidates=candidates_formatted
     ))
     
@@ -175,7 +175,7 @@ def compare_candidates(resume_data: List[Tuple[str, str]], jd_text: Optional[str
 def score_and_rank_candidates(resume_data: List[Tuple[str, str]], 
                             jd_text: Optional[str] = None,
                             criteria: Optional[Dict[str, int]] = None) -> Dict:
-    """Scoring with name integration"""
+    """Scoring dengan integrasi nama"""
     scorer = ResumeScorer(criteria or {
         "Technical Skills": 8,
         "Problem Solving": 7,
@@ -184,13 +184,13 @@ def score_and_rank_candidates(resume_data: List[Tuple[str, str]],
         "Cultural Fit": 4
     })
     
-    # Prepare input for scorer
+    # Siapkan input untuk scorer
     resume_texts = [data[0] for data in resume_data]
     filenames = [data[1] for data in resume_data]
     
     results = scorer.compare_resumes(resume_texts, jd_text)
     
-    # Add names to results
+    # Tambahkan nama ke hasil
     for i, result in enumerate(results["ranking"]):
         result["name"] = _get_candidate_name(resume_texts[i], filenames[i])
     
