@@ -1,0 +1,13 @@
+streamlit
+langchain
+langchain-groq
+langchain-community
+python-dotenv
+python-docx
+pypdf
+pyzip
+unstructured
+chromadb
+sentence-transformers
+plotly
+python-magic-bin==0.4.14  
