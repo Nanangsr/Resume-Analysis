@@ -6,10 +6,10 @@ import os
 import zipfile
 
 def parse_resume(file: Union[BinaryIO, str], filename: str = "") -> Tuple[str, str]:
-    """Extract text from resume file (PDF or DOCX)
+    """Ekstrak teks dari file resume (PDF atau DOCX)
     Returns: (text, error_message)"""
     try:
-        if isinstance(file, str):  # Handle file path
+        if isinstance(file, str):  # Handle path file
             with open(file, 'rb') as f:
                 return parse_resume(f, os.path.basename(file))
         
@@ -46,7 +46,7 @@ def parse_resume(file: Union[BinaryIO, str], filename: str = "") -> Tuple[str, s
     return "", f"File {filename}: Format tidak didukung (harus PDF/DOCX)"
 
 def parse_uploaded_folder(uploaded_folder) -> Tuple[List[str], List[str]]:
-    """Parse all resume files from uploaded folder (zip)
+    """Parse semua file resume dari folder yang diupload (zip)
     Returns: (resume_texts, error_messages)"""
     resume_texts = []
     error_messages = []
@@ -66,7 +66,7 @@ def parse_uploaded_folder(uploaded_folder) -> Tuple[List[str], List[str]]:
                     if error:
                         error_messages.append(error)
         
-        # Clean up
+        # Bersihkan direktori temporary
         for root, dirs, files in os.walk(temp_dir, topdown=False):
             for name in files:
                 os.remove(os.path.join(root, name))
