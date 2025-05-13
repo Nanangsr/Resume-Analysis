@@ -6,7 +6,7 @@ from typing import List, Tuple
 import re
 import logging
 
-# Configure logging
+# Konfigurasi logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -16,113 +16,113 @@ class ResumeStandardizer:
     def __init__(self):
         self.llm = ChatGroq(
             temperature=0,
-            model_name="deepseek-r1-distill-llama-70b",  # More cost-effective model
+            model_name="deepseek-r1-distill-llama-70b",  # Model yang lebih hemat biaya
             api_key=os.getenv("GROQ_API_KEY"),
             request_timeout=30
         )
         self._init_prompts()
         
     def _init_prompts(self):
-        """Initialize and cache prompt templates"""
+        """Inisialisasi dan cache template prompt"""
         self.standardization_prompt = ChatPromptTemplate.from_template(
-            """Transform this resume into a perfect ATS-friendly format following EXACTLY these rules:
+            """Transformasikan resume ini ke format yang ramah ATS dengan mengikuti aturan berikut:
             
-            [STRUCTURE RULES]
-            1. MANDATORY SECTIONS (in this order):
-               - SUMMARY: 3-5 sentence professional overview
-               - EXPERIENCE: Reverse chronological, MM/YYYY dates
-               - EDUCATION: Degrees only, MM/YYYY
-               - SKILLS: Grouped by category (Technical, Soft, etc.)
-               - (Optional) CERTIFICATIONS, PROJECTS if applicable
+            [ATURAN STRUKTUR]
+            1. BAGIAN WAJIB (urutannya):
+               - SUMMARY: Ringkasan profesional 3-5 kalimat
+               - EXPERIENCE: Urutan kronologis terbalik, format MM/YYYY
+               - EDUCATION: Gelar saja, format MM/YYYY
+               - SKILLS: Dikelompokkan berdasarkan kategori (Teknis, Soft Skill, dll)
+               - (Opsional) SERTIFIKASI, PROYEK jika ada
             
-            2. FORMATTING:
-               - Bullet points only (no paragraphs)
-               - Start each bullet with strong action verb
-               - Quantify achievements (e.g., "Increased X by 30%")
-               - Remove: pronouns, personal info (address, birthdate)
-               - Company names in bold: **Company**
-               - Job titles in italics: *Title*
+            2. FORMAT:
+               - Hanya poin-poin (tidak ada paragraf)
+               - Mulai setiap poin dengan kata kerja kuat
+               - Kuantifikasi pencapaian (contoh: "Meningkatkan X sebesar 30%")
+               - Hapus: kata ganti, info pribadi (alamat, tanggal lahir)
+               - Nama perusahaan tebal: **Perusahaan**
+               - Jabatan miring: *Jabatan*
             
-            3. CONTENT:
-               - Keep only professional information
-               - Remove: photos, tables, graphics
-               - Standardize degree names (BSc not Bachelor of Science)
+            3. KONTEN:
+               - Hanya informasi profesional
+               - Hapus: foto, tabel, grafik
+               - Standarisasi nama gelar (BSc bukan Bachelor of Science)
             
             Input Resume:
             {resume_text}
             
-            Output ONLY the perfectly formatted resume text, NO additional commentary.
+            Output HANYA teks resume yang sudah diformat, TANPA komentar tambahan.
             """
         )
         
         self.level_detection_prompt = ChatPromptTemplate.from_template(
-            """Analyze resume experience and determine level (STRICT RULES):
+            """Analisa pengalaman di resume dan tentukan level (ATURAN KETAT):
             
-            [LEVEL CRITERIA]
+            [KRITERIA LEVEL]
             Junior:
-            - 0-3 years total experience
-            - Entry-level job titles
-            - No team leadership
-            - Education may be highlighted
+            - 0-3 tahun pengalaman
+            - Jabatan entry-level
+            - Tidak ada kepemimpinan tim
+            - Pendidikan mungkin ditonjolkan
             
             Mid:
-            - 4-7 years experience
-            - Some project/team leadership
-            - Moderate achievements
-            - Specialized skills
+            - 4-7 tahun pengalaman
+            - Beberapa kepemimpinan proyek/tim
+            - Pencapaian moderat
+            - Keterampilan khusus
             
             Senior:
-            - 8+ years experience
-            - Clear career progression
-            - Significant leadership
-            - Strategic impact evidence
+            - 8+ tahun pengalaman
+            - Progresi karier jelas
+            - Kepemimpinan signifikan
+            - Bukti dampak strategis
             
-            [ANALYSIS]
-            Resume Excerpt:
+            [ANALISIS]
+            Cuplikan Resume:
             {resume_excerpt}
             
-            Return ONLY the exact level keyword: junior | mid | senior
+            Kembalikan HANYA kata kunci level: junior | mid | senior
             """
         )
 
     def standardize_resume(self, resume_text: str) -> str:
-        """Optimized resume standardization with validation"""
+        """Standarisasi resume dengan validasi yang dioptimalkan"""
         try:
             if not resume_text or len(resume_text.strip()) < 50:
-                raise ValueError("Resume text too short")
+                raise ValueError("Teks resume terlalu pendek")
                 
-            # Pre-process text
+            # Pra-pemrosesan teks
             cleaned_text = self._preprocess_text(resume_text)
             
             chain = self.standardization_prompt | self.llm
             result = chain.invoke({"resume_text": cleaned_text}).content
             
-            # Post-process and validate
+            # Pasca-pemrosesan dan validasi
             return self._validate_standardized_resume(result)
             
         except Exception as e:
-            logger.error(f"Standardization failed: {str(e)}")
+            logger.error(f"Gagal standarisasi: {str(e)}")
             return self._fallback_format(resume_text)
 
     def detect_resume_level(self, resume_text: str) -> str:
-        """More reliable level detection with fallback"""
+        """Deteksi level resume yang lebih andal dengan fallback"""
         try:
             excerpt = self._extract_relevant_excerpt(resume_text)
             chain = self.level_detection_prompt | self.llm
             response = chain.invoke({"resume_excerpt": excerpt}).content.lower()
             
-            # Validate response
+            # Validasi respons
             if response not in {'junior', 'mid', 'senior'}:
-                raise ValueError(f"Invalid level detected: {response}")
+                raise ValueError(f"Level tidak valid terdeteksi: {response}")
                 
             return response
             
         except Exception as e:
-            logger.warning(f"Level detection failed: {str(e)}")
+            logger.warning(f"Deteksi level gagal: {str(e)}")
             return self._estimate_level_fallback(resume_text)
 
     def standardize_multiple(self, resume_texts: List[str]) -> Tuple[List[str], List[str]]:
-        """Batch processing with progress tracking"""
+        """Proses batch dengan pelacakan progres"""
         standardized = []
         errors = []
         
@@ -136,39 +136,39 @@ class ResumeStandardizer:
         return standardized, errors
     
     def _preprocess_text(self, text: str) -> str:
-        """Clean input text before processing"""
-        # Remove multiple spaces, weird characters
+        """Bersihkan teks input sebelum pemrosesan"""
+        # Hapus spasi ganda, karakter aneh
         text = re.sub(r'\s+', ' ', text).strip()
-        # Remove non-ASCII characters
+        # Hapus karakter non-ASCII
         return text.encode('ascii', 'ignore').decode('ascii')
 
     def _validate_standardized_resume(self, text: str) -> str:
-        """Check if output meets minimum requirements"""
+        """Periksa apakah output memenuhi persyaratan minimum"""
         required_sections = {'SUMMARY', 'EXPERIENCE', 'EDUCATION', 'SKILLS'}
         present_sections = {s for s in required_sections if s in text}
         
         if len(present_sections) < 3:
-            raise ValueError("Missing required sections")
+            raise ValueError("Bagian wajib tidak lengkap")
             
-        # Check bullet point usage
+        # Periksa penggunaan poin-poin
         if text.count('•') < 5 and text.count('-') < 5:
-            raise ValueError("Insufficient bullet points")
+            raise ValueError("Poin-poin tidak cukup")
             
         return text
 
     def _extract_relevant_excerpt(self, text: str) -> str:
-        """Extract most relevant portion for level detection"""
-        # Prioritize experience section
+        """Ekstrak bagian paling relevan untuk deteksi level"""
+        # Prioritaskan bagian pengalaman
         experience_match = re.search(r'EXPERIENCE(.+?)(?=\n[A-Z]{3,}|$)', text, re.DOTALL|re.IGNORECASE)
         if experience_match:
             return experience_match.group(1)[:2000]
         return text[:1500]
 
     def _estimate_level_fallback(self, text: str) -> str:
-        """Simple fallback level estimation"""
+        """Estimasi level sederhana sebagai fallback"""
         year_patterns = r'(\d{4}[-–]\d{4}|\d{4}[^\d]\w+ \d{4})'
         matches = re.findall(year_patterns, text)
-        total_years = min(len(matches) * 2, 15)  # Estimate 2 years per position
+        total_years = min(len(matches) * 2, 15)  # Estimasi 2 tahun per posisi
         
         if total_years <= 3:
             return 'junior'
@@ -177,10 +177,10 @@ class ResumeStandardizer:
         return 'senior'
 
     def _fallback_format(self, text: str) -> str:
-        """Basic formatting when LLM fails"""
+        """Format dasar ketika LLM gagal"""
         sections = [
-            "SUMMARY:\n[Extracted professional summary]",
+            "SUMMARY:\n[Ringkasan profesional yang diekstrak]",
             "\nEXPERIENCE:\n" + re.sub(r'(?<=\n)(?=\S)', '• ', text),
-            "\nSKILLS:\n[Extracted skills]"
+            "\nSKILLS:\n[Keterampilan yang diekstrak]"
         ]
         return '\n'.join(sections)
