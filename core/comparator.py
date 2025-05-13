@@ -3,32 +3,32 @@ from langchain.prompts import ChatPromptTemplate
 from utils.resume_standardizer import ResumeStandardizer
 
 def compare_resumes(resume_texts: List[str], llm) -> str:
-    """Compare multiple standardized resumes"""
+    """Bandingkan beberapa resume yang sudah distandardisasi"""
     standardizer = ResumeStandardizer()
     
-    # Standardize all resumes first
+    # Standarisasi semua resume terlebih dahulu
     standardized_resumes, _ = standardizer.standardize_multiple(resume_texts)
     
     prompt = ChatPromptTemplate.from_template(
-        """Compare these standardized resumes and provide recommendations:
-        1. Comparative summary
-        2. Best candidate for technical roles
-        3. Best candidate for leadership roles
-        4. Cultural fit considerations
+        """Bandingkan resume-resume yang sudah distandardisasi ini dan berikan rekomendasi:
+        1. Ringkasan perbandingan
+        2. Kandidat terbaik untuk peran teknis
+        3. Kandidat terbaik untuk peran kepemimpinan
+        4. Pertimbangan kecocokan budaya
         
-        Standardized Resumes:
+        Resume yang Sudah Distandardisasi:
         {resumes}
         
-        Focus on:
-        - Skills alignment
-        - Experience relevance
-        - Leadership potential
-        - Career progression
+        Fokus pada:
+        - Kesesuaian keterampilan
+        - Relevansi pengalaman
+        - Potensi kepemimpinan
+        - Progresi karier
         """
     )
     
     formatted_resumes = "\n\n---\n\n".join(
-        f"Candidate {i+1} (Standardized):\n{text}" 
+        f"Kandidat {i+1} (Standardisasi):\n{text}" 
         for i, text in enumerate(standardized_resumes))
     
     chain = prompt | llm
