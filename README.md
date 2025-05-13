@@ -146,7 +146,7 @@ pip install -r requirements.txt
 
 - Atur API Key
 ``` bash
-GROQ_API_KEY="gsk_xxxxxx"
+GROQ_API_KEY="gsk_xxxxxx" (Dapatkan GROQ API KEY di laman berikut https://console.groq.com/keys)
 EMBEDDING_MODEL="all-MiniLM-L6-v2"
 ```
 
