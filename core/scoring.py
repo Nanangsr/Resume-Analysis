@@ -8,7 +8,7 @@ import logging
 import streamlit as st
 from utils.resume_standardizer import ResumeStandardizer
 
-# Configure logging
+# Konfigurasi logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -55,25 +55,25 @@ class ResumeScorer:
         }
         
     def _extract_score(self, llm_response: str) -> float:
-        """Extract numerical score from LLM response with improved parsing"""
+        """Ekstrak skor numerik dari respons LLM dengan parsing yang ditingkatkan"""
         try:
-            # More robust score extraction
+            # Ekstraksi skor yang lebih robust
             response = llm_response.strip().lower()
             
-            # Look for explicit score indicators
+            # Cari indikator skor eksplisit
             if "score:" in response:
                 score_part = response.split("score:")[1].strip()
                 numbers = re.findall(r'\d+\.?\d*', score_part)
                 if numbers:
                     return float(numbers[0])
             
-            # Look for numerical values in the entire response
+            # Cari nilai numerik di seluruh respons
             numbers = re.findall(r'\d+\.?\d*', response)
             if numbers:
                 score = float(numbers[0])
                 return max(1, min(10, score))
             
-            # Look for textual indicators
+            # Cari indikator tekstual
             if any(word in response for word in ["excellent", "outstanding", "9", "10"]):
                 return 9.0
             elif any(word in response for word in ["good", "strong", "7", "8"]):
@@ -84,21 +84,21 @@ class ResumeScorer:
                 return 3.0
                 
         except Exception as e:
-            logger.error(f"Score extraction error: {str(e)}")
-            return 5.0  # Safe default score
+            logger.error(f"Error ekstraksi skor: {str(e)}")
+            return 5.0  # Skor default yang aman
         
     def detect_experience_level(self, resume_text: str) -> str:
-        """Detect candidate level based on resume content"""
+        """Deteksi level kandidat berdasarkan konten resume"""
         prompt = ChatPromptTemplate.from_template(
-            """Analyze this resume and determine the candidate's experience level:
-            - 'junior': 0-3 years experience
-            - 'mid': 4-7 years experience
-            - 'senior': 8+ years experience
+            """Analisis resume ini dan tentukan level pengalaman kandidat:
+            - 'junior': 0-3 tahun pengalaman
+            - 'mid': 4-7 tahun pengalaman
+            - 'senior': 8+ tahun pengalaman
             
             Resume:
             {resume_text}
             
-            Return ONLY one of: ['junior', 'mid', 'senior']"""
+            Kembalikan HANYA salah satu: ['junior', 'mid', 'senior']"""
         )
         
         chain = prompt | self.llm
@@ -106,7 +106,7 @@ class ResumeScorer:
         return level if level in ['junior', 'mid', 'senior'] else 'mid'
     
     def score_resume(self, resume_text: str) -> Dict:  # Ubah return type ke Dict
-        """Score a resume with level-adjusted expectations"""
+        """Skor resume dengan ekspektasi yang disesuaikan level"""
         try:
             # Pertama standardisasi resume
             standardized_resume = self.standardizer.standardize_resume(resume_text)
@@ -122,20 +122,20 @@ class ResumeScorer:
                 min_exp, max_exp = self.level_expectations.get(level, {}).get(criterion, (1, 10))
                 
                 prompt = ChatPromptTemplate.from_template(
-                    """Evaluate this resume for {criterion} (Weight: {weight}):
-                    Candidate Level: {level}
-                    Expected Range for Level: {min_exp}-{max_exp}
+                    """Evaluasi resume ini untuk {criterion} (Bobot: {weight}):
+                    Level Kandidat: {level}
+                    Range yang Diharapkan untuk Level: {min_exp}-{max_exp}
                     
-                    Evaluation Scale:
-                    1-3 = Below expectations for level
-                    4-6 = Meets basic expectations
-                    7-8 = Exceeds expectations
-                    9-10 = Outstanding for level
+                    Skala Evaluasi:
+                    1-3 = Di bawah ekspektasi untuk level
+                    4-6 = Memenuhi ekspektasi dasar
+                    7-8 = Melebihi ekspektasi
+                    9-10 = Luar biasa untuk level
                     
-                    Resume Excerpt:
+                    Cuplikan Resume:
                     {resume_excerpt}
                     
-                    Provide ONLY the numerical score (1-10)"""
+                    Berikan HANYA skor numerik (1-10)"""
                 )
                 
                 chain = prompt | self.llm
@@ -166,8 +166,8 @@ class ResumeScorer:
             }
             
         except Exception as e:
-            logger.error(f"Error scoring resume: {str(e)}")
-            # Return default scores if error occurs
+            logger.error(f"Error saat menilai resume: {str(e)}")
+            # Kembalikan skor default jika terjadi error
             return {
                 "scores": {k: 5 * (v/10) for k, v in self.criteria.items()},
                 "total_score": 50,
@@ -177,7 +177,7 @@ class ResumeScorer:
             }
     
     def compare_resumes(self, resume_texts: List[str], jd_text: str = None) -> Dict:
-        """Score and compare multiple resumes with enhanced reliability"""
+        """Skor dan bandingkan beberapa resume dengan keandalan yang ditingkatkan"""
         results = []
         
         for i, text in enumerate(resume_texts):
@@ -194,10 +194,10 @@ class ResumeScorer:
                 }
             })
         
-        # Rank candidates by total_score
+        # Urutkan kandidat berdasarkan total_score
         results.sort(key=lambda x: x["total_score"], reverse=True)
         
-        # Add ranking position
+        # Tambahkan posisi ranking
         for i, result in enumerate(results):
             result["rank"] = i + 1
         
@@ -207,8 +207,9 @@ class ResumeScorer:
             "max_score": self.max_score,
             "scoring_guide": self.scoring_guide
         }
+    
 def _adjust_for_level(self, score: float, min_exp: int, max_exp: int) -> float:
-        """Normalize score based on level expectations"""
+        """Normalisasi score berdasar level expectations"""
         # Jika score di bawah minimum untuk levelnya
         if score < min_exp:
             return max(1, score * 0.7)  # Penalize more for underperforming
@@ -259,14 +260,14 @@ def score_and_rank_candidates(resume_texts: List[str], jd_text: Optional[str] = 
         """
     )
     
-    # Format ranking information with interpretations
+    # Format ranking informasi dengan interpretasi
     ranking_summary = "\n\n".join(
         f"Candidate #{r['rank']} (Overall: {r['total_score']:.1f}/{scorer.max_score}, {r['percentage']:.1f}%)\n"
         + "\n".join(
             f"- {k}: {v:.1f} ({r['score_interpretation'][k]})"
             for k, v in r['scores'].items()
         )
-        for r in results['ranking'][:5]  # Show top 5 for analysis
+        for r in results['ranking'][:5]  # menampilkan top 5 untuk analysis
     )
     
     chain = analysis_prompt | scorer.llm
@@ -275,7 +276,7 @@ def score_and_rank_candidates(resume_texts: List[str], jd_text: Optional[str] = 
         "ranking_summary": ranking_summary
     }).content
     
-    # Add analysis to results
+    # Tambahkan analysis ke results
     results["analysis"] = analysis
     
     return results
