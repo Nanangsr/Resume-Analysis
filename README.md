@@ -1,4 +1,4 @@
-# Resume-Analysis  
+# RAG Resume Analyzer  
 
 ## Profil
 - Nama : Nanang Safiu Ridho
@@ -9,15 +9,11 @@ RAG Resume Analyzer adalah alat komprehensif untuk memproses, menganalisis, dan 
 
 ## Fitur Utama
 1. **Pencarian Kandidat**: Mencocokkan dan menganalisis kriteria kandidat dengan deskripsi pekerjaan yang di upload
-   ![image](https://github.com/user-attachments/assets/84ec2d06-beff-4acc-a745-064f1a647866)
 2. **Profil Kandidat**: Membuat profil kandidat secara detail dengan mengandalkan standarisasi resume
-   ![image](https://github.com/user-attachments/assets/5309e8ac-5e62-4bda-bcad-4c4791ce1f09)
 3. **Tanya Jawab**: Mendapatkan jawaban atas pertanyaan spesifik tentang resume kandidat
-   ![image](https://github.com/user-attachments/assets/b5edfc6e-b8eb-4e76-bd57-20399ec8e0fa)
 4. **Analisis Komparatif**: Membandingkan beberapa kandidat secara bersamaan berdasar deskripsi pekerjaan
-   ![image](https://github.com/user-attachments/assets/76e7a5c2-b0e0-4923-a6e3-4f0d476ce0e9)
 5. **Sistem Penilaian**: Meranking kandidat berdasarkan kriteria yang dapat disesuaikan
-   ![image](https://github.com/user-attachments/assets/ce0c9741-2d5f-419f-9918-d0740275bb76)
+   
 
 ## Komponen Inti
 ```bash
@@ -168,21 +164,27 @@ streamlit run main.py
 **1. Mode Pencarian Kandidat**
 - Upload deskripsi pekerjaan (PDF/DOCX).
 - Sistem akan menampilkan 3 kandidat terbaik dari database.
-- Apabila kurang atau tidak ada sama sekali maka sistem akan memberikan rekomendasi kriteria kandidat
+- Apabila kurang atau tidak ada sama sekali maka sistem akan memberikan rekomendasi kriteria kandidat.
+![image](https://github.com/user-attachments/assets/84ec2d06-beff-4acc-a745-064f1a647866)
 
 **2. Mode Profil Kandidat & Tanya Jawab**
-- Upload resume kandidat.
+- Upload resume kandidat (PDF/DOCX).
 - Ajukan pertanyaan seperti:
     - "Apa pengalaman kerja terakhir kandidat?"
     - "Apakah kandidat memiliki skill Python?"
+![image](https://github.com/user-attachments/assets/5309e8ac-5e62-4bda-bcad-4c4791ce1f09)
+![image](https://github.com/user-attachments/assets/b5edfc6e-b8eb-4e76-bd57-20399ec8e0fa)
 
-**3. Mode Perbandingan**
+**3. Analisis Komperentif**
 - Upload beberapa resume (atau folder ZIP).
+![image](https://github.com/user-attachments/assets/76e7a5c2-b0e0-4923-a6e3-4f0d476ce0e9)
 
-**4. Mode Scoring (perbadingan dengan score)**
+**4. Mode Scoring atau Penilaian (perbadingan dengan score)**
+- Upload beberapa resume (atau folder ZIP)
 - Atur kriteria penilaian (misal: *Technical=8, Leadership=6*).
 - Lihat hasil ranking & visualisasi.
-- Pilih ekspor hasil dengan format .csv atau .json
+- Pilih ekspor hasil dengan format .csv atau .json.
+![image](https://github.com/user-attachments/assets/ce0c9741-2d5f-419f-9918-d0740275bb76)
 
 ## Lisensi
 © 2024 RAG Resume Analyzer
