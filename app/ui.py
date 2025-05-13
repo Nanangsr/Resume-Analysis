@@ -6,10 +6,10 @@ from utils.name_extractor import NameExtractor  # Updated import
 import pandas as pd
 import plotly.express as px
 
-# Initialize NameExtractor
+# Inisialisasi NameExtractor
 name_extractor = NameExtractor()
 
-# Initialize session state
+# Inisialisasi session state
 if 'uploaded_resumes' not in st.session_state:
     st.session_state.uploaded_resumes = {
         "Candidate Search by Job Description": None,
@@ -26,12 +26,12 @@ if 'last_jd_text' not in st.session_state:
 
 def render_ui() -> Tuple[str, Union[Dict, List, None], Optional[str]]:
     """Render Streamlit UI and collect inputs"""
-    # Initialize default values
+    # Inisialisasi nilai default
     use_case = "Candidate Search by Job Description"
     inputs = None
     question = None
     
-    # Ensure all required keys exist in session state
+    # Pastikan semua key yang diperlukan ada di session state
     if 'uploaded_resumes' not in st.session_state:
         st.session_state.uploaded_resumes = {
             "Candidate Search by Job Description": None,
@@ -129,7 +129,7 @@ def render_ui() -> Tuple[str, Union[Dict, List, None], Optional[str]]:
                 for file in resume_files:
                     text, error = parse_resume(file, file.name)
                     if text:
-                        valid_resumes.append((text, file.name))  # Store both text and filename
+                        valid_resumes.append((text, file.name)) # Simpan teks dan nama file
                     if error:
                         error_messages.append(error)
                 
@@ -144,7 +144,7 @@ def render_ui() -> Tuple[str, Union[Dict, List, None], Optional[str]]:
             )
             if uploaded_folder:
                 valid_resumes, error_messages = parse_uploaded_folder(uploaded_folder)
-                # For ZIP files, we don't have individual filenames
+                # Untuk file ZIP, kita tidak punya nama file individual
                 st.session_state.uploaded_resumes["Compare Multiple Candidates"] = [(text, "") for text in valid_resumes]
                 st.session_state.upload_errors = error_messages
         
@@ -173,7 +173,7 @@ def render_ui() -> Tuple[str, Union[Dict, List, None], Optional[str]]:
     elif use_case == "Compare with Scoring":
         st.header("📈 Compare with Scoring")
 
-        # Add criteria configuration
+        # Tambahkan konfigurasi kriteria
         with st.expander("⚙️ Scoring Criteria Configuration", expanded=True):
             st.write("Configure the weights for each scoring criterion (1-10):")
             criteria = {}
@@ -211,7 +211,7 @@ def render_ui() -> Tuple[str, Union[Dict, List, None], Optional[str]]:
                 for file in resume_files:
                     text, error = parse_resume(file, file.name)
                     if text:
-                        valid_resumes.append((text, file.name))  # Store both text and filename
+                        valid_resumes.append((text, file.name))  # Simpan teks dan nama file
                     if error:
                         error_messages.append(error)
                 
@@ -226,7 +226,7 @@ def render_ui() -> Tuple[str, Union[Dict, List, None], Optional[str]]:
             )
             if uploaded_folder:
                 valid_resumes, error_messages = parse_uploaded_folder(uploaded_folder)
-                # For ZIP files, we don't have individual filenames
+                # Untuk file ZIP, kita tidak punya nama file individual
                 st.session_state.uploaded_resumes["Compare with Scoring"] = [(text, "") for text in valid_resumes]
                 st.session_state.upload_errors = error_messages
         
@@ -248,7 +248,7 @@ def render_ui() -> Tuple[str, Union[Dict, List, None], Optional[str]]:
                 st.error(error)
         
         if current_resumes and len(current_resumes) >= 2:
-            # Generate candidate names
+            # Generate nama kandidat
             candidate_names = []
             for i, (resume_text, filename) in enumerate(current_resumes):
                 name = name_extractor.extract_name_from_resume(resume_text, filename)
