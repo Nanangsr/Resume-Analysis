@@ -9,7 +9,7 @@ import streamlit as st
 from core.scoring import score_and_rank_candidates  
 
 def process_use_case(use_case: str, inputs: Union[Dict, List], question: Optional[str] = None) -> Union[str, Dict]:
-    """Route the use case to appropriate function"""
+    """Arahkan use case ke fungsi yang sesuai"""
     if use_case == "Candidate Search by Job Description":
         return candidate_search(inputs["jd_text"])
     elif use_case == "Candidate Profiling / Resume QA":
@@ -26,9 +26,9 @@ def process_use_case(use_case: str, inputs: Union[Dict, List], question: Optiona
             jd_text,
             inputs.get("criteria")
         )
-        # Ensure results has the correct structure
+        # Pastikan results memiliki struktur yang benar
         if isinstance(results, dict) and "ranking" in results:
             return results
-        return {"error": "Invalid scoring results"}  # Fallback
+        return {"error": "Hasil scoring tidak valid"}  # Fallback
     else:
-        return "Invalid use case"
+        return "Use case tidak valid"
