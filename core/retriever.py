@@ -3,7 +3,7 @@ from core.embedding import get_embedding_model
 import os
 
 def get_retriever():
-    """Initialize and return retriever"""
+    """Inisialisasi dan kembalikan retriever"""
     embedding = get_embedding_model()
     vector_store = Chroma(
         persist_directory="vector_store/chroma",
