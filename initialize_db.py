@@ -7,18 +7,20 @@ from pypdf import PdfReader
 import glob
 
 def initialize_vector_store():
-    """Initialize ChromaDB with sample resumes"""
+    """Inisialisasi ChromaDB dengan contoh resume"""
     embedding = get_embedding_model()
+    # Pembagi teks untuk memecah dokumen menjadi bagian-bagian kecil
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     
     documents = []
+    # Proses semua file PDF di direktori data/resumes
     for resume_path in glob.glob("data/resumes/*.pdf"):
         with open(resume_path, "rb") as f:
             text = parse_resume(f)
             chunks = text_splitter.split_text(text)
             documents.extend(chunks)
     
-    # Hapus parameter device
+    # Buat vector store dari teks-teks yang sudah diproses
     Chroma.from_texts(
         documents,
         embedding,
