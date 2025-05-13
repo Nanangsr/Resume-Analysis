@@ -11,28 +11,32 @@ from utils.name_extractor import extract_name_from_resume
 load_dotenv()
 
 def main():
+    # Konfigurasi halaman Streamlit
     st.set_page_config(page_title="RAG Resume Analyzer", layout="wide")
     st.title("📄 AI Resume Analyzer with Groq")
     
+    # Render UI dan dapatkan input pengguna
     use_case, inputs, question = render_ui()
     
     if use_case and inputs:
         with st.spinner("Processing..."):
             try:
+                # Proses use case yang dipilih
                 results = process_use_case(use_case, inputs, question)
                 
                 st.subheader("Results")
                 
+                # Handle khusus untuk kasus perbandingan dengan scoring
                 if use_case == "Compare with Scoring" and isinstance(results, dict):
-                    # Validate results structure
+                    # Validasi struktur hasil
                     if "ranking" not in results or not isinstance(results["ranking"], list):
-                        st.error("Invalid results format from scoring system")
+                        st.error("Format hasil scoring tidak valid")
                         return
                     
-                    # Get candidate names from session state or extract them
+                    # Dapatkan nama kandidat dari session state atau ekstrak
                     candidate_names = st.session_state.get("candidate_names", [])
                     if len(candidate_names) != len(results["ranking"]):
-                        # Regenerate names if mismatch
+                        # Generate ulang nama jika tidak sesuai
                         candidate_names = []
                         for i, candidate in enumerate(results["ranking"]):
                             if isinstance(candidate, dict) and "text" in candidate:
@@ -45,10 +49,10 @@ def main():
                                 candidate_names.append(f"Candidate {i+1}")
                         st.session_state.candidate_names = candidate_names
                         
-                    # Display ranking table
+                    # Tampilkan tabel ranking
                     st.markdown("### 🏆 Candidate Ranking")
                     
-                    # Prepare data for display
+                    # Siapkan data untuk ditampilkan
                     display_data = []
                     for idx, candidate in enumerate(results["ranking"]):
                         if not isinstance(candidate, dict):
@@ -61,7 +65,7 @@ def main():
                             "Percentage": f"{candidate.get('percentage', 0):.1f}%"
                         }
                         
-                        # Add individual scores
+                        # Tambahkan skor individual
                         if "scores" in candidate and isinstance(candidate["scores"], dict):
                             for criterion, score in candidate["scores"].items():
                                 row[criterion] = f"{score:.1f}"
@@ -71,13 +75,13 @@ def main():
                     df = pd.DataFrame(display_data)
                     df = df.set_index("Rank")
                     
-                    # Display table
+                    # Tampilkan tabel
                     st.dataframe(
                         df.style.format(precision=1),
                         use_container_width=True
                     )
 
-                    # Visualizations for top candidates
+                    # Visualisasi untuk kandidat teratas
                     top_n = min(3, len(results["ranking"]))
                     
                     # Radar chart
@@ -111,7 +115,7 @@ def main():
                     
                     # Bar chart
                     st.markdown("### 📊 Detailed Criteria Comparison")
-                    if plot_data:  # Reuse data from radar chart
+                    if plot_data:  # Gunakan data yang sama dari radar chart
                         fig_bar = px.bar(
                             pd.DataFrame(plot_data),
                             x="Criterion",
@@ -124,9 +128,10 @@ def main():
                         )
                         st.plotly_chart(fig_bar, use_container_width=True)
 
-                    # Export functionality
+                    # Fungsi ekspor
                     @st.cache_data
                     def prepare_export_data():
+                        """Siapkan data untuk diekspor ke CSV dan JSON"""
                         csv_data = []
                         json_data = results.copy()
                         
@@ -172,7 +177,7 @@ def main():
                                 mime="application/json"
                             )
 
-                    # Display analysis
+                    # Tampilkan analisis
                     if "analysis" in results:
                         st.markdown("### 📝 Detailed Analysis")
                         st.write(results["analysis"])
@@ -181,7 +186,7 @@ def main():
                     st.write(results)
                     
             except Exception as e:
-                st.error(f"Error during processing: {str(e)}")
+                st.error(f"Error selama pemrosesan: {str(e)}")
 
 if __name__ == "__main__":
     main()
