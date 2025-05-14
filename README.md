@@ -2,7 +2,7 @@
 
 ## Profil
 - Nama : Nanang Safiu Ridho
-- Posisi : Data Science Intern at DataIns
+- Posisi : Data Scientist Intern at DataIns
 
 ## Gambaran Umum Projek
 RAG Resume Analyzer adalah alat komprehensif untuk memproses, menganalisis, dan membandingkan resume menggunakan teknik Retrieval-Augmented Generation (RAG). Aplikasi ini memanfaatkan API LLM Groq yang cepat dan model embedding lokal untuk menyediakan kemampuan analisis resume yang efisien.
