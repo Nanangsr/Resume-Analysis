@@ -129,7 +129,7 @@ RAG Resume Analyzer adalah alat komprehensif untuk memproses, menganalisis, dan 
 - Clone Repositori
 ``` bash
 git clone https://github.com/Nanangsr/Resume-Analysis.git
-cd rag-resume-analyzer
+cd Resume-Analysis
 ```
 
 -  Setup Environment:
