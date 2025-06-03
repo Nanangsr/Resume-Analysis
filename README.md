@@ -217,9 +217,9 @@ streamlit run main.py
      
      ![Screenshot 2025-06-03 213028](https://github.com/user-attachments/assets/9f2f9b84-52b3-4ddb-9e1d-c7c745d426c1)
      ![Screenshot 2025-06-03 213125](https://github.com/user-attachments/assets/f9101b7a-9b77-4f69-9b81-d8f6fbe6933a)
-     ![Screenshot 2025-06-03 213159](https://github.com/user-attachments/assets/f57979c0-3f80-440d-b70c-3a7da68eee4b)
      ![Screenshot 2025-06-03 213147](https://github.com/user-attachments/assets/0b904a70-ea00-4613-bb0c-65bc01ed117d)
      ![Screenshot 2025-06-03 213153](https://github.com/user-attachments/assets/ed0f83ed-42b2-463c-9f54-32750746f9f7)
+     ![Screenshot 2025-06-03 213159](https://github.com/user-attachments/assets/f57979c0-3f80-440d-b70c-3a7da68eee4b)
 
 ## Dukungan Domain
 Sistem mendukung analisis khusus domain untuk:
