@@ -29,15 +29,7 @@ name_extractor = NameExtractor()
 # Daftar domain yang didukung
 SUPPORTED_DOMAINS = ["General", "IT", "HR", "Finance", "Marketing", "Sales", "Operations"]
 
-# Inisialisasi session state
-if 'uploaded_resumes' not in st.session_state:
-    st.session_state.uploaded_resumes = {
-        "Candidate Search by Job Description": None,
-        "Candidate Profiling / Resume QA": None,
-        "Compare Multiple Candidates": [],
-        "Compare with Scoring": []
-    }
-
+# Inisialisasi session state lainnya
 if 'upload_errors' not in st.session_state:
     st.session_state.upload_errors = []
 
@@ -266,7 +258,7 @@ def display_scoring_results(results: Dict):
                                         st.success("✅ Analisis standar berhasil dibuat!")
                                         st.rerun()
                                 except Exception as e:
-                                    st.error(f"❌ Error: {str(e)}")
+                                        st.error(f"❌ Error: {str(e)}")
                 else:
                     st.warning("📝 Konten analisis terlalu pendek atau kosong")
                     logger.info(f"Short or empty narrative: '{cleaned_narrative[:100]}...'")
@@ -414,7 +406,7 @@ def render_ui() -> Tuple[str, Union[Dict, List, None], Optional[str]]:
     st.session_state.selected_domain = st.sidebar.selectbox(
         "Pilih Domain",
         SUPPORTED_DOMAINS,
-        index=SUPPORTED_DOMAINS.index(st.session_state.selected_domain),
+        index=SUPPORTED_DOMAINS.index(st.session_state.get('selected_domain', 'General')),
         help="Pilih domain untuk menyesuaikan kriteria penilaian dan analisis."
     )
     
@@ -547,7 +539,7 @@ def render_ui() -> Tuple[str, Union[Dict, List, None], Optional[str]]:
             with col1:
                 st.success(f"Berhasil mengunggah {len(current_resumes)} resume")
             with col2:
-                if st.button("Clear Resume", key="clear_compare_resume"):
+                if st.button("Hapus Semua Resume", key="clear_compare_resume"):
                     st.session_state.uploaded_resumes["Compare Multiple Candidates"] = []
                     st.session_state.upload_errors = []
                     st.rerun()
@@ -663,7 +655,7 @@ def render_ui() -> Tuple[str, Union[Dict, List, None], Optional[str]]:
             with col1:
                 st.success(f"Berhasil mengunggah {len(current_resumes)} resume")
             with col2:
-                if st.button("Clear Resume", key="clear_score_resume"):
+                if st.button("Hapus Semua Resume", key="clear_score_resume"):
                     st.session_state.uploaded_resumes["Compare with Scoring"] = []
                     st.session_state.upload_errors = []
                     st.session_state.show_scoring_results = False
