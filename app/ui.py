@@ -29,28 +29,6 @@ name_extractor = NameExtractor()
 # Daftar domain yang didukung
 SUPPORTED_DOMAINS = ["General", "IT", "HR", "Finance", "Marketing", "Sales", "Operations"]
 
-# Inisialisasi session state lainnya
-if 'upload_errors' not in st.session_state:
-    st.session_state.upload_errors = []
-
-if 'last_jd_text' not in st.session_state:
-    st.session_state.last_jd_text = None
-
-if 'last_scoring_results' not in st.session_state:
-    st.session_state.last_scoring_results = None
-
-if 'last_narrative_analysis' not in st.session_state:
-    st.session_state.last_narrative_analysis = None
-
-if 'show_scoring_results' not in st.session_state:
-    st.session_state.show_scoring_results = False
-
-if 'selected_domain' not in st.session_state:
-    st.session_state.selected_domain = "General"
-
-if 'processed_flag' not in st.session_state:
-    st.session_state.processed_flag = False  # Flag untuk mencegah pemrosesan ganda
-
 def display_scoring_results(results: Dict):
     """Display scoring results with tabs for different analyses"""
     logger.info(f"Displaying scoring results: {type(results)}")
@@ -475,7 +453,7 @@ def render_ui() -> Tuple[str, Union[Dict, List, None], Optional[str]]:
             
     elif use_case == "Compare Multiple Candidates":
         st.header("📊 Compare Multiple Candidates")
-        if st.session_state.last_jd_text:
+        if 'last_jd_text' in st.session_state and st.session_state.last_jd_text:
             st.info("Membandingkan kandidat terhadap deskripsi pekerjaan terakhir yang diunggah")
             with st.expander("Lihat Deskripsi Pekerjaan"):
                 st.write(st.session_state.last_jd_text)
@@ -539,12 +517,12 @@ def render_ui() -> Tuple[str, Union[Dict, List, None], Optional[str]]:
             with col1:
                 st.success(f"Berhasil mengunggah {len(current_resumes)} resume")
             with col2:
-                if st.button("Hapus Semua Resume", key="clear_compare_resume"):
+                if st.button("Clear All Resume", key="clear_compare_resume"):
                     st.session_state.uploaded_resumes["Compare Multiple Candidates"] = []
                     st.session_state.upload_errors = []
                     st.rerun()
             
-        if st.session_state.upload_errors:
+        if 'upload_errors' in st.session_state and st.session_state.upload_errors:
             st.warning("Beberapa file tidak dapat diproses:")
             for error in st.session_state.upload_errors:
                 st.error(error)
@@ -564,7 +542,7 @@ def render_ui() -> Tuple[str, Union[Dict, List, None], Optional[str]]:
             display_scoring_results(st.session_state.last_scoring_results)
             st.markdown("---")
         
-        if st.session_state.last_jd_text:
+        if 'last_jd_text' in st.session_state and st.session_state.last_jd_text:
             st.info("Penilaian kandidat berdasarkan deskripsi pekerjaan terakhir yang diunggah")
             with st.expander("Lihat Deskripsi Pekerjaan"):
                 st.write(st.session_state.last_jd_text)
@@ -645,7 +623,7 @@ def render_ui() -> Tuple[str, Union[Dict, List, None], Optional[str]]:
                     st.session_state.upload_errors = [f"Failed to parse folder: {str(e)}"]
                     logger.error(f"Folder parsing exception: {str(e)}")
         
-        if st.session_state.upload_errors:
+        if 'upload_errors' in st.session_state and st.session_state.upload_errors:
             st.warning("Beberapa file tidak dapat diproses:")
             for error in st.session_state.upload_errors:
                 st.error(error)
@@ -655,7 +633,7 @@ def render_ui() -> Tuple[str, Union[Dict, List, None], Optional[str]]:
             with col1:
                 st.success(f"Berhasil mengunggah {len(current_resumes)} resume")
             with col2:
-                if st.button("Hapus Semua Resume", key="clear_score_resume"):
+                if st.button("Clear All Resume", key="clear_score_resume"):
                     st.session_state.uploaded_resumes["Compare with Scoring"] = []
                     st.session_state.upload_errors = []
                     st.session_state.show_scoring_results = False
