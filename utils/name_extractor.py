@@ -1,49 +1,75 @@
 import os
 import re
 from typing import Optional
+from pydantic import BaseModel, field_validator
+import hashlib
+
+class CandidateName(BaseModel):
+    full_name: str
+
+    @field_validator('full_name')
+    @classmethod
+    def validate_name(cls, v):
+        if not v.strip():
+            raise ValueError('Nama tidak boleh kosong')
+        words = v.split()
+        if len(words) < 2:
+            raise ValueError('Nama harus terdiri dari setidaknya dua kata')
+        # Validasi setiap kata: minimal 3 huruf untuk nama, atau 1-2 huruf untuk inisial
+        for word in words:
+            if len(word) < 3 and not re.match(r'^[A-Z][a-z]?$', word):
+                raise ValueError(f'Kata "{word}" tidak valid sebagai nama atau inisial')
+        return v.strip()
 
 class NameExtractor:
     def __init__(self):
-        # Prefix yang mungkin digunakan sebelum nama dalam resume
         self.name_prefixes = ["nama:", "name:", "full name:", "nama lengkap:", "candidate:", "applicant:"]
-        # Kata-kata yang tidak termasuk nama
         self.exclude_words = ["resume", "cv", "curriculum", "vitae", "document", "file", "copy"]
-        # Pattern untuk nama Indonesia dan internasional
+        self.header_keywords = [
+            "skills", "education", "experience", "employment", "history",
+            "profile", "summary", "objective", "certifications", "projects"
+        ]
         self.name_patterns = [
-            r'^([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})$',  # Standard name format
-            r'^([A-Z][a-z]+(?:\s+[A-Z]\.?\s*)*[A-Z][a-z]+)$',  # Name with initials
-            r'^([A-Z][a-z]+(?:\s+[a-z]+)*\s+[A-Z][a-z]+)$',  # Name with lowercase middle
+            r'^([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})$',
+            r'^([A-Z][a-z]+(?:\s+[A-Z]\.?\s*)*[A-Z][a-z]+)$',
+            r'^([A-Z][a-z]+(?:\s+[a-z]+)*\s+[A-Z][a-z]+)$',
         ]
     
     def extract_name_from_resume(self, resume_text: str, filename: str = "") -> str:
-        """Ekstraksi nama dari teks resume dengan fallback ke nama file"""
+        """Ekstraksi nama dengan prioritas dari nama file, lalu dari teks resume, dengan validasi Pydantic"""
         try:
-            # Pertama coba ekstrak dari teks resume
-            text_name = self._extract_from_text(resume_text)
-            if text_name and len(text_name.split()) >= 2:
-                return text_name
-                
-            # Jika gagal, gunakan nama file
             if filename:
                 file_name = self._extract_from_filename(filename)
                 if file_name:
-                    return file_name
-                    
+                    try:
+                        candidate = CandidateName(full_name=file_name)
+                        return candidate.full_name
+                    except ValueError as e:
+                        print(f"Validasi nama dari file gagal: {e}")
+            
+            text_name = self._extract_from_text(resume_text)
+            if text_name:
+                try:
+                    candidate = CandidateName(full_name=text_name)
+                    return candidate.full_name
+                except ValueError as e:
+                    print(f"Validasi nama dari teks gagal: {e}")
+                
         except Exception as e:
             print(f"Error extracting name: {e}")
-            
+    
         return self._generate_fallback_name(filename)
     
     def _extract_from_text(self, text: str) -> Optional[str]:
-        """Ekstrak nama dari konten teks resume"""
         if not text:
             return None
             
         lines = [line.strip() for line in text.split('\n') if line.strip()]
         
-        # Pola 1: Cari label nama yang eksplisit
         for line in lines[:20]:
             line_lower = line.lower()
+            if any(keyword in line_lower for keyword in self.header_keywords):
+                continue
             for prefix in self.name_prefixes:
                 if prefix in line_lower:
                     name_part = line.split(':', 1)[-1].strip()
@@ -51,14 +77,12 @@ class NameExtractor:
                     if cleaned_name and len(cleaned_name.split()) >= 2:
                         return cleaned_name
         
-        # Pola 2: Cari kandidat nama di baris-baris awal
         potential_names = []
-        for line in lines[:15]:
-            # Skip lines yang terlalu panjang atau mengandung kata kunci umum
-            if len(line) > 50 or any(word in line.lower() for word in self.exclude_words):
+        for line in lines[:10]:
+            line_lower = line.lower()
+            if len(line) > 50 or any(word in line_lower for word in self.exclude_words + self.header_keywords):
                 continue
                 
-            # Check if line matches name patterns
             for pattern in self.name_patterns:
                 if re.match(pattern, line.strip()):
                     cleaned = self._clean_name_text(line)
@@ -66,12 +90,13 @@ class NameExtractor:
                         potential_names.append(cleaned)
                         break
         
-        # Pola 3: Cari nama di awal dokumen (3 baris pertama)
         if not potential_names:
             for line in lines[:3]:
+                line_lower = line.lower()
+                if any(keyword in line_lower for keyword in self.header_keywords):
+                    continue
                 words = line.split()
                 if 2 <= len(words) <= 4:
-                    # Check if all words start with capital letter
                     if all(word[0].isupper() and word.isalpha() for word in words):
                         cleaned = self._clean_name_text(line)
                         if cleaned:
@@ -80,43 +105,39 @@ class NameExtractor:
         return potential_names[0] if potential_names else None
     
     def _extract_from_filename(self, filename: str) -> Optional[str]:
-        """Ekstrak nama dari nama file dengan berbagai variasi"""
         if not filename:
             return None
             
         try:
-            # Remove path and extension
-            base_name = os.path.splitext(os.path.basename(filename))[0]
+            base_name = os.path.splitext(os.path.basename(filename))[0].lower()
             
-            # Remove common prefixes/suffixes
-            base_name = re.sub(r'^(resume|cv|curriculum|vitae)[-_\s]*', '', base_name, flags=re.IGNORECASE)
-            base_name = re.sub(r'[-_\s]*(resume|cv|curriculum|vitae)$', '', base_name, flags=re.IGNORECASE)
+            base_name = re.sub(r'^(resume|cv|curriculum|vitae)[-_]?\s*', '', base_name)
+            base_name = re.sub(r'\s*[-_]?(resume|cv|curriculum|vitae)$', '', base_name)
             
-            # Replace separators with spaces
-            base_name = re.sub(r'[-_]+', ' ', base_name)
+            base_name = re.sub(r'[-_]+', ' ', base_name).strip()
             
-            # Remove numbers and special characters, keep only letters and spaces
-            clean_name = re.sub(r'[^a-zA-Z\s]', '', base_name)
+            clean_name = re.sub(r'[^a-z\s]', '', base_name).strip()
             
-            # Split and filter words
-            words = [word for word in clean_name.split() if len(word) > 1]
-            
+            words = clean_name.split()
             if len(words) >= 2:
-                # Take first 2-3 meaningful words
-                name_words = []
-                for word in words[:4]:  # Check up to 4 words
-                    if word[0].isupper() or len(name_words) == 0:  # First word or capitalized
-                        name_words.append(word.capitalize())
-                    if len(name_words) >= 3:  # Limit to 3 words max
-                        break
-                
+                name_words = [word.capitalize() for word in words if len(word) >= 2]
                 if len(name_words) >= 2:
-                    return ' '.join(name_words)
+                    return ' '.join(name_words[:3])
             
-            # Fallback: try to extract from original filename with different approach
-            original_words = re.findall(r'[A-Z][a-z]+', filename)
-            if len(original_words) >= 2:
-                return ' '.join(original_words[:3])
+            if '_' in base_name or '-' in base_name:
+                parts = re.split(r'[-_]', base_name)
+                name_words = [part.capitalize() for part in parts if len(part) >= 1]
+                if len(name_words) >= 2:
+                    return ' '.join(name_words[:3])
+            
+            clean_base = re.sub(r'[^a-z]', '', base_name)
+            if len(clean_base) >= 4:
+                # Heuristik: nama depan biasanya lebih panjang, sisanya inisial atau nama belakang
+                for split_point in range(3, len(clean_base) - 1):  # Mulai dari 3 untuk nama depan
+                    first_name = clean_base[:split_point]
+                    last_name = clean_base[split_point:]
+                    if len(first_name) >= 3 and (1 <= len(last_name) <= 2 or len(last_name) >= 3):
+                        return f"{first_name.capitalize()} {last_name.capitalize()}"
                 
         except Exception as e:
             print(f"Error extracting from filename: {e}")
@@ -124,21 +145,16 @@ class NameExtractor:
         return None
     
     def _clean_name_text(self, text: str) -> Optional[str]:
-        """Clean and validate name text"""
         if not text:
             return None
             
-        # Remove extra whitespace and common prefixes
         text = re.sub(r'\s+', ' ', text.strip())
         text = re.sub(r'^(mr\.?|mrs\.?|ms\.?|dr\.?)\s*', '', text, flags=re.IGNORECASE)
         
-        # Check if it's a valid name (2-4 words, each starting with capital)
         words = text.split()
         if 2 <= len(words) <= 4:
-            # Each word should be mostly alphabetic and reasonable length
             valid_words = []
             for word in words:
-                # Remove punctuation at the end
                 clean_word = re.sub(r'[^\w]$', '', word)
                 if len(clean_word) >= 2 and clean_word.isalpha():
                     valid_words.append(clean_word.capitalize())
@@ -149,31 +165,15 @@ class NameExtractor:
         return None
     
     def _generate_fallback_name(self, filename: str = "") -> str:
-        """Buat nama fallback dari nama file atau generic"""
         if filename:
-            try:
-                # Try to extract any meaningful part from filename
-                base = os.path.splitext(os.path.basename(filename))[0]
-                # Remove common words and get first meaningful word
-                clean = re.sub(r'(resume|cv|curriculum|vitae)', '', base, flags=re.IGNORECASE)
-                clean = re.sub(r'[^a-zA-Z]', '', clean)
-                
-                if len(clean) >= 3:
-                    return clean[:10].capitalize() + " Candidate"
-            except:
-                pass
+            base = os.path.splitext(os.path.basename(filename))[0]
+            clean = re.sub(r'(resume|cv|curriculum|vitae)', '', base, flags=re.IGNORECASE)
+            clean = re.sub(r'[^a-zA-Z]', '', clean)
+            
+            if len(clean) >= 3:
+                return clean[:10].capitalize() + " Candidate"
         
-        # Generate unique fallback
-        import hashlib
         hash_val = hashlib.md5(filename.encode() if filename else b"default").hexdigest()[:6]
         return f"Candidate {hash_val.upper()}"
 
-# Buat instance di level modul
 name_extractor = NameExtractor()
-
-def extract_name_from_resume(self, resume_text: str, filename: str) -> str:
-        # Contoh implementasi aman
-        match = re.search(r'NAME:\s*(.+?)\n', resume_text)
-        if match:
-            return match.group(1).strip()  # Return string, bukan tuple
-        return name_extractor.extract_name_from_resume(resume_text, filename)
