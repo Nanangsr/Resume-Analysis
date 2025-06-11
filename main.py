@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 def main():
-    # Inisialisasi session state untuk uploaded_resumes
+    # Inisialisasi semua session state yang diperlukan
     if 'uploaded_resumes' not in st.session_state:
         st.session_state.uploaded_resumes = {
             "Candidate Search by Job Description": None,
@@ -39,6 +39,20 @@ def main():
             "Compare Multiple Candidates": [],
             "Compare with Scoring": []
         }
+    if 'last_jd_text' not in st.session_state:
+        st.session_state.last_jd_text = None
+    if 'upload_errors' not in st.session_state:
+        st.session_state.upload_errors = []
+    if 'last_scoring_results' not in st.session_state:
+        st.session_state.last_scoring_results = None
+    if 'last_narrative_analysis' not in st.session_state:
+        st.session_state.last_narrative_analysis = None
+    if 'show_scoring_results' not in st.session_state:
+        st.session_state.show_scoring_results = False
+    if 'selected_domain' not in st.session_state:
+        st.session_state.selected_domain = "General"
+    if 'processed_flag' not in st.session_state:
+        st.session_state.processed_flag = False
 
     st.set_page_config(page_title="RAG Resume Analyzer", layout="wide")
     st.title("📄 AI Resume Analyzer with Groq")
