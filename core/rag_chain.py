@@ -1,6 +1,7 @@
 import asyncio
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv # DIHAPUS
+import streamlit as st # DITAMBAH
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from core.retriever import get_retriever
@@ -9,12 +10,11 @@ from core.scoring import ResumeScorer
 from utils.resume_standardizer import ResumeStandardizer
 from utils.name_extractor import NameExtractor
 from concurrent.futures import ThreadPoolExecutor
-import streamlit as st
 import logging
 import hashlib
 import re
 
-load_dotenv()
+# load_dotenv() # DIHAPUS
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -31,7 +31,8 @@ class ResumeRagChain:
         self.llm = ChatGroq(
             temperature=0,
             model_name="deepseek-r1-distill-llama-70b",
-            api_key=os.getenv("GROQ_API_KEY"),
+            # DIUBAH: Ambil API Key dari Streamlit Secrets, bukan os.getenv
+            api_key=st.secrets["GROQ_API_KEY"], 
             request_timeout=120
         )
         self.name_extractor = NameExtractor()
