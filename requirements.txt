@@ -16,7 +16,7 @@ spacy
 # Data & Vector Store
 pandas
 numpy
-chromadb
+chromadb==0.4.15
 faiss-cpu
 scikit-learn
 # File Parsers
