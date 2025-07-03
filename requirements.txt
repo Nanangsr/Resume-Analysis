@@ -1,42 +1,30 @@
 setuptools
-streamlit==1.45.0
-langchain==0.0.300
+streamlit
+# Langchain and related
+langchain
 langchain-groq
 langchain-community
-python-dotenv==1.0.0
-python-docx==0.8.11
-pypdf==3.17.0
-chromadb==0.4.22
-sentence-transformers==2.2.2
-plotly==5.18.0
-pandas==1.5.3
-numpy==1.24.3
-scikit-learn==1.3.2
-joblib==1.3.2
-lightgbm==4.1.0
-xgboost==2.0.0
-torch==2.0.0
-transformers==4.35.0
-accelerate==0.26.0
-spacy==3.7.2
-langdetect==1.0.9
-aif360==0.5.0
-shap==0.44.0
-nltk==3.8.1
-python-dateutil==2.8.2
-streamlit-extras==0.2.0
-watchdog==2.3.1
 langchain-core
 langchain-text-splitters
-pdfminer.six==20221105
-docx2txt==0.8
-faiss-cpu==1.7.4
-matplotlib==3.8.0
-seaborn==0.13.0
-altair==5.1.2
-tensorboard==2.15.1
-optuna==3.4.0
-huggingface-hub==0.19.4
-requests==2.31.0
-tqdm==4.66.1
-pydantic==1.10.13
+# Core ML/NLP
+torch
+transformers
+sentence-transformers
+nltk
+spacy
+# Data & Vector Store
+pandas
+numpy
+chromadb
+faiss-cpu
+scikit-learn
+# File Parsers
+python-dotenv
+python-docx
+pypdf
+pdfminer.six
+docx2txt
+# Plotting
+plotly
+matplotlib
+seaborn
