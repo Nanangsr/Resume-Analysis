@@ -1,6 +1,6 @@
 import os
 import streamlit as st
-from dotenv import load_dotenv
+# from dotenv import load_dotenv # DIHAPUS
 from app.ui import render_ui, display_scoring_results
 from app.controller import process_use_case
 import pandas as pd
@@ -16,7 +16,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = ""
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # Muat variabel lingkungan dari file .env
-load_dotenv()
+# load_dotenv() # DIHAPUS
 
 # Konfigurasi logging
 logging.basicConfig(
