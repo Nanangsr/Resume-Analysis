@@ -1,5 +1,6 @@
 setuptools
 protobuf==3.20.3
+pysqlite3-binary
 streamlit
 # Langchain and related
 langchain
@@ -16,7 +17,7 @@ spacy
 # Data & Vector Store
 pandas
 numpy
-chromadb==0.4.15
+chromadb==0.4.24
 faiss-cpu
 scikit-learn
 # File Parsers
